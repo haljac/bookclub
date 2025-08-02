@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Guide: The Daily Briefing Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutrals with Tech Teal -->
+    <!-- Application Structure Plan: The SPA is structured to mirror the agent's actual workflow, guiding the user from high-level concept to concrete implementation. It starts with an overview, then presents an interactive flowchart of the agent's process. Clicking each step of the flowchart reveals the specific details (like tools or prompts) associated with that phase. This is followed by a checklist for implementation and a final simulation. This task-oriented, interactive flow was chosen over a static document to make the project more engaging and to clarify the relationship between the conceptual steps and the tangible code required. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Agent Workflow -> Goal: Organize/Inform -> Viz/Method: Interactive Flowchart Diagram (HTML/Tailwind) -> Interaction: Click a step to reveal details. -> Justification: Visually represents the process, making it intuitive. Interaction links concept to detail.
+        - Report Info: Required Tools -> Goal: Inform -> Viz/Method: Tabbed content within the interactive flowchart's detail panel. -> Interaction: Click tabs for 'Weather' or 'News' tool. -> Justification: Organizes technical details cleanly, preventing information overload.
+        - Report Info: Implementation Steps -> Goal: Organize/Change -> Viz/Method: Interactive Checklist. -> Interaction: User can check items off. -> Justification: Provides a clear, satisfying path to completion.
+        - Report Info: Example Output -> Goal: Inform -> Viz/Method: A simulated output panel. -> Interaction: Revealed by clicking the final step in the workflow. -> Justification: Provides a concrete example of the project's goal.
+        - Library/Method: Vanilla JS and Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .flow-step {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .flow-step.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .detail-panel {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .hidden-detail {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            position: absolute;
+        }
+        .visible-detail {
+            opacity: 1;
+            transform: translateY(0);
+            position: relative;
+        }
+        .checklist-item label:hover {
+            text-decoration: line-through;
+            color: #0d9488;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-600">The Daily Briefing Agent</h1>
+            <p class="mt-4 text-lg text-slate-600">An interactive guide for your book club's next project.</p>
+        </header>
+
+        <section id="overview" class="mb-16 bg-white p-8 rounded-xl shadow-sm">
+            <h2 class="text-2xl font-bold mb-4 text-teal-700">Project Goal & Core Concepts</h2>
+            <p class="text-slate-600 mb-6">This section provides a high-level overview of the project. The main goal is to build a simple agent that uses multiple tools to gather information (weather and news) and then uses a Large Language Model (LLM) to synthesize that information into a single, human-readable "daily briefing." This project is designed to solidify your understanding of several key agentic principles.</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-teal-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-teal-800">Tool Use & Workflow</h3>
+                    <p class="text-teal-900 text-sm">Learn how to define and call distinct Python functions as "tools" and orchestrate them in a logical sequence.</p>
+                </div>
+                <div class="bg-teal-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-teal-800">Synthesis & State</h3>
+                    <p class="text-teal-900 text-sm">Understand how an agent holds information (state) from its tools and uses an LLM to synthesize it into a cohesive output.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-teal-700">The Agent's Workflow</h2>
+                <p class="text-slate-600 mt-2">This is the heart of our agent. The diagram below shows the step-by-step process the agent will follow. Click on each step to see the specific details, tools, and prompts involved in that phase. This interaction will help you connect the high-level plan to the code you'll be writing.</p>
+            </div>
+            
+            <div id="flow-diagram" class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0">
+                <div id="step-1" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(1)">
+                    <div class="text-2xl mb-2">👤</div>
+                    <h3 class="font-semibold">1. User Trigger</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-2" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(2)">
+                    <div class="text-2xl mb-2">🛠️</div>
+                    <h3 class="font-semibold">2. Gather Info</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-3" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(3)">
+                    <div class="text-2xl mb-2">✍️</div>
+                    <h3 class="font-semibold">3. Synthesize</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-4" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(4)">
+                    <div class="text-2xl mb-2">📰</div>
+                    <h3 class="font-semibold">4. Final Output</h3>
+                </div>
+            </div>
+
+            <div id="details-container" class="mt-8 bg-white p-8 rounded-xl shadow-lg min-h-[300px] relative">
+                <div id="detail-0" class="detail-panel visible-detail text-center text-slate-500">
+                    <p class="text-lg">Click a step above to see the details.</p>
+                </div>
+                <div id="detail-1" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 1: User Trigger</h3>
+                    <p>The workflow starts when the user provides a simple prompt. The agent doesn't need to parse complex language for this project; it just needs to be triggered to start its process.</p>
+                    <div class="mt-4 p-4 bg-slate-100 rounded-lg">
+                        <p class="font-mono text-sm text-slate-700">"Good morning, what's my daily briefing?"</p>
+                    </div>
+                </div>
+                <div id="detail-2" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 2: Information Gathering (Tools)</h3>
+                    <p class="mb-4">This is where the agent uses its tools. For this project, you will build two Python functions that act as tools to fetch external data. You can use real APIs or just return mock data to focus on the agent's logic. Select a tool below to see its required structure.</p>
+                    <div id="tool-tabs">
+                        <div class="border-b border-slate-200">
+                            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                                <button id="tab-weather" onclick="showTool('weather')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm border-teal-500 text-teal-600">Weather Checker</button>
+                                <button id="tab-news" onclick="showTool('news')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300">News Fetcher</button>
+                            </nav>
+                        </div>
+                        <div id="tool-content" class="mt-4">
+                            <div id="tool-weather">
+                                <p class="text-sm mb-2"><strong class="font-semibold">Function:</strong> <code class="bg-slate-100 p-1 rounded">get_weather(location: str) -> dict</code></p>
+                                <p class="text-sm mb-2"><strong class="font-semibold">Example Output (as a Python dictionary):</strong></p>
+                                <pre class="bg-slate-100 p-4 rounded-lg text-sm text-slate-800"><code>{'location': 'San Francisco, CA', 'temperature': '65F', 'condition': 'Cloudy'}</code></pre>
+                            </div>
+                            <div id="tool-news" style="display: none;">
+                                <p class="text-sm mb-2"><strong class="font-semibold">Function:</strong> <code class="bg-slate-100 p-1 rounded">get_top_headlines(topic: str, count: int = 3) -> dict</code></p>
+                                <p class="text-sm mb-2"><strong class="font-semibold">Example Output (as a Python dictionary):</strong></p>
+                                <pre class="bg-slate-100 p-4 rounded-lg text-sm text-slate-800"><code>{'topic': 'technology', 'headlines': ['New AI Model Released', 'Quantum Computing Breakthrough', 'Tech Stocks on the Rise']}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="detail-3" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 3: Synthesis Phase</h3>
+                    <p>After gathering information from its tools, the agent combines the data into a single, comprehensive prompt. This prompt instructs the LLM to synthesize the structured data into a natural language paragraph.</p>
+                    <p class="mt-4 font-semibold">Example Final Prompt:</p>
+                    <pre class="bg-slate-100 p-4 mt-2 rounded-lg text-sm text-slate-800"><code>You are a helpful assistant. Today is {current_date}.
+Based on the following information, please write a short, friendly daily briefing:
+
+Weather Data: {'location': 'San Francisco, CA', ...}
+News Headlines: {'topic': 'technology', ...}
+
+Combine this into a single, easy-to-read paragraph.</code></pre>
+                </div>
+                <div id="detail-4" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 4: Final Output</h3>
+                    <p>This is the final result—the polished, human-readable text generated by the LLM. It seamlessly integrates the information gathered by the agent's tools.</p>
+                    <div class="mt-4 p-4 bg-teal-50 border-l-4 border-teal-400 rounded-r-lg">
+                        <p class="text-slate-700 italic">"Good morning! It's Tuesday, August 5th. Expect a cloudy day in San Francisco with a temperature around 65°F. In technology news, the top stories today are about a new AI model being released, a recent breakthrough in quantum computing, and a general rise in tech stocks."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="implementation" class="mb-16 bg-white p-8 rounded-xl shadow-sm">
+            <h2 class="text-2xl font-bold mb-4 text-teal-700">Implementation Plan</h2>
+            <p class="text-slate-600 mb-6">Here is your high-level plan. Follow these steps to build your agent. This interactive checklist will help you track your progress as you work through the project.</p>
+            <div class="space-y-4">
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step1-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step1-check" class="font-medium text-slate-900">1. Build the Tools</label>
+                        <p class="text-slate-500">Create the `get_weather` and `get_top_headlines` Python functions. Test them to ensure they return data in the correct format.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step2-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step2-check" class="font-medium text-slate-900">2. Create the Agent's Core Logic</label>
+                        <p class="text-slate-500">Write a main function to orchestrate the workflow: call the tools and then pass their results to the synthesizer.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step3-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step3-check" class="font-medium text-slate-900">3. Build the Synthesizer</label>
+                        <p class="text-slate-500">Create the `synthesize_briefing` function that constructs the final prompt and calls the LLM.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stretch-goals" class="bg-white p-8 rounded-xl shadow-sm">
+             <h2 class="text-2xl font-bold mb-4 text-teal-700">Stretch Goals</h2>
+             <p class="text-slate-600 mb-6">If you finish early and want an extra challenge, try tackling one of these optional goals. They introduce more advanced concepts like dynamic tool use and error handling.</p>
+             <ul class="list-disc list-inside space-y-2 text-slate-600">
+                <li>Make the `location` and `topic` parameters dynamic based on user input.</li>
+                <li>Add a third tool, like a function that checks a calendar for the day's events.</li>
+                <li>Implement robust error handling for when an API tool fails to return data.</li>
+             </ul>
+        </section>
+
+    </div>
+
+    <script>
+        let activeDetail = 0;
+        const detailsContainer = document.getElementById('details-container');
+
+        function showDetail(detailId) {
+            if (activeDetail === detailId) {
+                return;
+            }
+
+            const currentActiveStep = document.getElementById(`step-${activeDetail}`);
+            if (currentActiveStep) {
+                currentActiveStep.classList.remove('active', 'border-teal-500');
+            }
+            
+            const currentDetail = document.getElementById(`detail-${activeDetail}`);
+            if (currentDetail) {
+                currentDetail.classList.remove('visible-detail');
+                currentDetail.classList.add('hidden-detail');
+            }
+
+            const newDetail = document.getElementById(`detail-${detailId}`);
+            newDetail.classList.remove('hidden-detail');
+            newDetail.classList.add('visible-detail');
+            
+            const newActiveStep = document.getElementById(`step-${detailId}`);
+            newActiveStep.classList.add('active', 'border-teal-500');
+
+            activeDetail = detailId;
+        }
+        
+        showDetail(0);
+
+        function showTool(toolName) {
+            const weatherTool = document.getElementById('tool-weather');
+            const newsTool = document.getElementById('tool-news');
+            const weatherTab = document.getElementById('tab-weather');
+            const newsTab = document.getElementById('tab-news');
+
+            if (toolName === 'weather') {
+                weatherTool.style.display = 'block';
+                newsTool.style.display = 'none';
+                weatherTab.classList.add('border-teal-500', 'text-teal-600');
+                weatherTab.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                newsTab.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                newsTab.classList.remove('border-teal-500', 'text-teal-600');
+            } else {
+                weatherTool.style.display = 'none';
+                newsTool.style.display = 'block';
+                newsTab.classList.add('border-teal-500', 'text-teal-600');
+                newsTab.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                weatherTab.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                weatherTab.classList.remove('border-teal-500', 'text-teal-600');
+            }
+        }
+    </script>
+</body>
+</html>
