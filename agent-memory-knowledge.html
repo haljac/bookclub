@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Guide: Personal Knowledge Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutrals with Tech Teal -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .flow-step {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .flow-step.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .detail-panel {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .hidden-detail {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            position: absolute;
+        }
+        .visible-detail {
+            opacity: 1;
+            transform: translateY(0);
+            position: relative;
+        }
+        .checklist-item label:hover {
+            text-decoration: line-through;
+            color: #0d9488;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-600">Personal Knowledge Assistant</h1>
+            <p class="mt-4 text-lg text-slate-600">Build a document Q&A system using RAG and vector embeddings.</p>
+        </header>
+
+        <section id="overview" class="mb-16 bg-white p-8 rounded-xl shadow-sm">
+            <h2 class="text-2xl font-bold mb-4 text-teal-700">Project Goal & Core Concepts</h2>
+            <p class="text-slate-600 mb-6">Create a simple document question-answering system that demonstrates Retrieval Augmented Generation (RAG). You'll build a system that can ingest documents, create searchable embeddings, and answer questions by retrieving relevant context. This half-day project covers the essential building blocks of agent memory and knowledge systems.</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-teal-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-teal-800">RAG & Vector Search</h3>
+                    <p class="text-teal-900 text-sm">Learn to chunk documents, create embeddings, and perform semantic similarity searches to find relevant context.</p>
+                </div>
+                <div class="bg-teal-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-teal-800">Knowledge Retrieval</h3>
+                    <p class="text-teal-900 text-sm">Understand how to store document chunks as vectors and retrieve the most relevant ones to augment LLM prompts.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-teal-700">The RAG System Workflow</h2>
+                <p class="text-slate-600 mt-2">This diagram shows how your knowledge assistant will work. Click each step to understand the specific implementation details and see code examples.</p>
+            </div>
+
+            <div id="flow-diagram" class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0">
+                <div id="step-1" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(1)">
+                    <div class="text-2xl mb-2">📄</div>
+                    <h3 class="font-semibold">1. Document Ingestion</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-2" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(2)">
+                    <div class="text-2xl mb-2">🔍</div>
+                    <h3 class="font-semibold">2. Vector Storage</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-3" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(3)">
+                    <div class="text-2xl mb-2">❓</div>
+                    <h3 class="font-semibold">3. Query & Retrieve</h3>
+                </div>
+                <div class="text-2xl text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
+                <div id="step-4" class="flow-step bg-white p-4 rounded-lg shadow-md w-full md:w-48 text-center border-2 border-transparent" onclick="showDetail(4)">
+                    <div class="text-2xl mb-2">💬</div>
+                    <h3 class="font-semibold">4. Answer Generation</h3>
+                </div>
+            </div>
+
+            <div id="details-container" class="mt-8 bg-white p-8 rounded-xl shadow-lg min-h-[400px] relative">
+                <div id="detail-0" class="detail-panel visible-detail text-center text-slate-500">
+                    <p class="text-lg">Click a step above to see the implementation details.</p>
+                </div>
+                <div id="detail-1" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 1: Document Ingestion & Chunking</h3>
+                    <p class="mb-4">Split documents into smaller, overlapping chunks that can be individually embedded and searched. This is crucial for finding specific information within large documents.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold mb-2">Key Functions:</h4>
+                            <pre class="bg-slate-100 p-3 rounded text-sm"><code>def load_documents(folder_path):
+    # Load .txt files from folder
+
+def chunk_text(text, chunk_size=500,
+               overlap=100):
+    # Split with overlap for context</code></pre>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">Chunk Strategy:</h4>
+                            <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                <li>500-character chunks work well</li>
+                                <li>100-character overlap preserves context</li>
+                                <li>Split on sentences when possible</li>
+                                <li>Store chunk metadata (source, index)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="detail-2" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 2: Vector Storage & Embeddings</h3>
+                    <p class="mb-4">Convert text chunks into numerical vectors that capture semantic meaning. These embeddings allow for similarity-based search rather than just keyword matching.</p>
+                    <div id="embedding-tabs">
+                        <div class="border-b border-slate-200">
+                            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                                <button id="tab-simple" onclick="showEmbedding('simple')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm border-teal-500 text-teal-600">Simple Approach</button>
+                                <button id="tab-advanced" onclick="showEmbedding('advanced')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300">OpenAI Embeddings</button>
+                            </nav>
+                        </div>
+                        <div id="embedding-content" class="mt-4">
+                            <div id="embedding-simple">
+                                <p class="text-sm mb-3"><strong>For learning:</strong> Use TF-IDF or simple word counting</p>
+                                <pre class="bg-slate-100 p-3 rounded text-sm"><code>from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer = TfidfVectorizer(max_features=1000)
+embeddings = vectorizer.fit_transform(chunks)</code></pre>
+                            </div>
+                            <div id="embedding-advanced" style="display: none;">
+                                <p class="text-sm mb-3"><strong>Production-ready:</strong> OpenAI's text-embedding-3-small</p>
+                                <pre class="bg-slate-100 p-3 rounded text-sm"><code>import openai
+
+def get_embedding(text):
+    response = openai.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    )
+    return response.data[0].embedding</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="detail-3" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 3: Query Processing & Retrieval</h3>
+                    <p class="mb-4">When a user asks a question, convert it to the same embedding space and find the most similar document chunks using cosine similarity or distance metrics.</p>
+                    <div class="mb-4">
+                        <h4 class="font-semibold mb-2">Retrieval Process:</h4>
+                        <pre class="bg-slate-100 p-3 rounded text-sm"><code>def retrieve_relevant_chunks(query, embeddings,
+                           chunks, top_k=3):
+    # 1. Embed the query
+    query_embedding = get_embedding(query)
+
+    # 2. Calculate similarities
+    similarities = cosine_similarity(
+        query_embedding, embeddings
+    )
+
+    # 3. Return top matches
+    return top_chunks_with_scores</code></pre>
+                    </div>
+                    <p class="text-sm text-slate-600">💡 <strong>Tip:</strong> Start with retrieving 3-5 chunks. Too few misses context, too many overwhelms the LLM.</p>
+                </div>
+                <div id="detail-4" class="detail-panel hidden-detail">
+                    <h3 class="font-bold text-xl mb-2 text-teal-700">Step 4: Context-Augmented Answer Generation</h3>
+                    <p class="mb-4">Combine retrieved chunks with the user's question in a carefully crafted prompt. The LLM uses this context to generate accurate, grounded answers.</p>
+                    <div class="mb-4">
+                        <h4 class="font-semibold mb-2">RAG Prompt Template:</h4>
+                        <pre class="bg-slate-100 p-3 rounded text-sm text-slate-700"><code>Context from documents:
+{retrieved_chunks}
+
+Question: {user_question}
+
+Please answer based on the provided context. If the answer isn't in the context, say "I don't have enough information to answer that question."</code></pre>
+                    </div>
+                    <div class="mt-4 p-4 bg-teal-50 border-l-4 border-teal-400 rounded-r-lg">
+                        <p class="text-slate-700 text-sm"><strong>Example Output:</strong> "Based on the documentation, the RAG system works by first chunking documents into 500-character segments, then creating embeddings for semantic search..."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation" class="mb-16 bg-white p-8 rounded-xl shadow-sm">
+            <h2 class="text-2xl font-bold mb-4 text-teal-700">Implementation Checklist</h2>
+            <p class="text-slate-600 mb-6">Follow these steps to build your personal knowledge assistant. Each step builds on the previous one, so complete them in order.</p>
+            <div class="space-y-4">
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step1-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step1-check" class="font-medium text-slate-900">1. Set Up Document Processing</label>
+                        <p class="text-slate-500">Create functions to load text files and split them into overlapping chunks. Test with 2-3 sample documents.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step2-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step2-check" class="font-medium text-slate-900">2. Build the Embedding System</label>
+                        <p class="text-slate-500">Choose TF-IDF for simplicity or OpenAI embeddings for better results. Create and store embeddings for all chunks.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step3-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step3-check" class="font-medium text-slate-900">3. Implement Similarity Search</label>
+                        <p class="text-slate-500">Build the retrieval function that finds the most relevant chunks for any given question.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step4-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step4-check" class="font-medium text-slate-900">4. Create the Q&A Interface</label>
+                        <p class="text-slate-500">Build a simple command-line interface that takes questions and returns context-aware answers.</p>
+                    </div>
+                </div>
+                <div class="checklist-item relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input id="step5-check" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600">
+                    </div>
+                    <div class="ml-3 text-sm leading-6">
+                        <label for="step5-check" class="font-medium text-slate-900">5. Test & Refine</label>
+                        <p class="text-slate-500">Ask various questions, check answer quality, and experiment with chunk sizes and retrieval parameters.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stretch-goals" class="bg-white p-8 rounded-xl shadow-sm">
+             <h2 class="text-2xl font-bold mb-4 text-teal-700">Stretch Goals</h2>
+             <p class="text-slate-600 mb-6">Ready for more advanced concepts? These extensions will deepen your understanding of agent memory systems and production RAG implementations.</p>
+             <ul class="list-disc list-inside space-y-2 text-slate-600">
+                <li><strong>Memory Types:</strong> Implement different storage for short-term (conversation history) vs. long-term (document knowledge).</li>
+                <li><strong>Hybrid Search:</strong> Combine semantic search with keyword matching for better retrieval accuracy.</li>
+                <li><strong>Vector Database:</strong> Replace in-memory storage with ChromaDB or similar for persistence and scalability.</li>
+                <li><strong>Conversation Memory:</strong> Track previous questions and answers to provide contextual follow-up responses.</li>
+                <li><strong>Source Attribution:</strong> Return which document sections were used to answer each question.</li>
+             </ul>
+        </section>
+
+    </div>
+
+    <script>
+        let activeDetail = 0;
+        const detailsContainer = document.getElementById('details-container');
+
+        function showDetail(detailId) {
+            if (activeDetail === detailId) {
+                return;
+            }
+
+            const currentActiveStep = document.getElementById(`step-${activeDetail}`);
+            if (currentActiveStep) {
+                currentActiveStep.classList.remove('active', 'border-teal-500');
+            }
+
+            const currentDetail = document.getElementById(`detail-${activeDetail}`);
+            if (currentDetail) {
+                currentDetail.classList.remove('visible-detail');
+                currentDetail.classList.add('hidden-detail');
+            }
+
+            const newDetail = document.getElementById(`detail-${detailId}`);
+            newDetail.classList.remove('hidden-detail');
+            newDetail.classList.add('visible-detail');
+
+            const newActiveStep = document.getElementById(`step-${detailId}`);
+            newActiveStep.classList.add('active', 'border-teal-500');
+
+            activeDetail = detailId;
+        }
+
+        showDetail(0);
+
+        function showEmbedding(embeddingType) {
+            const simpleEmbed = document.getElementById('embedding-simple');
+            const advancedEmbed = document.getElementById('embedding-advanced');
+            const simpleTab = document.getElementById('tab-simple');
+            const advancedTab = document.getElementById('tab-advanced');
+
+            if (embeddingType === 'simple') {
+                simpleEmbed.style.display = 'block';
+                advancedEmbed.style.display = 'none';
+                simpleTab.classList.add('border-teal-500', 'text-teal-600');
+                simpleTab.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                advancedTab.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                advancedTab.classList.remove('border-teal-500', 'text-teal-600');
+            } else {
+                simpleEmbed.style.display = 'none';
+                advancedEmbed.style.display = 'block';
+                advancedTab.classList.add('border-teal-500', 'text-teal-600');
+                advancedTab.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                simpleTab.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                simpleTab.classList.remove('border-teal-500', 'text-teal-600');
+            }
+        }
+    </script>
+</body>
+</html>
